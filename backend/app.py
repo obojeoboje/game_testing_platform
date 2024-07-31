@@ -21,6 +21,9 @@ class User(db.Model):
     password = db.Column(db.String(60), nullable=False)
     experience = db.Column(db.Integer, default=0)
     level = db.Column(db.Integer, default=1)
+    tests_completed = db.Column(db.Integer, default=0)
+    correct_answers = db.Column(db.Integer, default=0)
+    total_answers = db.Column(db.Integer, default=0)
 
 class Test(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -72,7 +75,6 @@ def get_tests():
     tests = Test.query.all()
     return jsonify([{'id': test.id, 'title': test.title} for test in tests]), 200
 
-
 @app.route('/tests/<int:test_id>', methods=['GET'])
 @jwt_required()
 def get_test(test_id):
@@ -103,9 +105,7 @@ def submit_test(test_id):
     test = Test.query.get_or_404(test_id)
     total_questions = len(test.questions)
 
-    # Проверка ответов и подсчет правильных
     correct_answers = 0
-
     for answer in data['answers']:
         question = Question.query.get(answer['question_id'])
         if question and question.test_id == test_id:
@@ -113,11 +113,12 @@ def submit_test(test_id):
             if option and option.question_id == question.id and option.is_correct:
                 correct_answers += 1
 
-    # Начисление опыта только за правильные ответы
-    experience_gained = correct_answers * 50  # 50 exp за каждый правильный ответ
+    experience_gained = correct_answers * 50
     user.experience += experience_gained
+    user.tests_completed += 1
+    user.correct_answers += correct_answers
+    user.total_answers += total_questions
 
-    # Проверка повышения уровня
     while user.experience >= 500:
         user.level += 1
         user.experience -= 500
@@ -130,6 +131,21 @@ def submit_test(test_id):
         'experience_gained': experience_gained,
         'current_experience': user.experience,
         'current_level': user.level
+    }), 200
+
+@app.route('/profile', methods=['GET'])
+@jwt_required()
+def get_profile():
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    return jsonify({
+        'username': user.username,
+        'experience': user.experience,
+        'level': user.level,
+        'tests_completed': user.tests_completed,
+        'correct_answers': user.correct_answers,
+        'total_answers': user.total_answers,
+        'accuracy': (user.correct_answers / user.total_answers * 100) if user.total_answers > 0 else 0
     }), 200
 
 def create_sample_data():
