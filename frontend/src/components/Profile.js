@@ -23,11 +23,11 @@ function Profile({ token }) {
 
   const experiencePercentage = (profile.experience / 500) * 100;
 
-const getAccuracyColor = (accuracy) => {
-  if (accuracy >= 80) return '#4caf50';  // зеленый
-  if (accuracy >= 60) return '#ffc107';  // желтый
-  return '#f44336';  // красный
-};
+  const getAccuracyColor = (accuracy) => {
+    if (accuracy >= 80) return '#4caf50';
+    if (accuracy >= 60) return '#ffc107';
+    return '#f44336';
+  };
 
   return (
     <div className="profile">
@@ -42,6 +42,12 @@ const getAccuracyColor = (accuracy) => {
       <p>Correct Answers: {profile.correct_answers}</p>
       <p>Total Answers: {profile.total_answers}</p>
       <p>Accuracy: <span style={{ color: getAccuracyColor(profile.accuracy) }}>{profile.accuracy.toFixed(2)}%</span></p>
+      <h3>Achievements</h3>
+      <ul className="achievements-list">
+        {profile.achievements.map((achievement, index) => (
+          <li key={index} className="achievement">{achievement}</li>
+        ))}
+      </ul>
     </div>
   );
 }

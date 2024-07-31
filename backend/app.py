@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from flask_cors import CORS
-from datetime import timedelta
+from datetime import timedelta, datetime
 import random
 
 app = Flask(__name__)
@@ -24,6 +24,7 @@ class User(db.Model):
     tests_completed = db.Column(db.Integer, default=0)
     correct_answers = db.Column(db.Integer, default=0)
     total_answers = db.Column(db.Integer, default=0)
+    achievements = db.Column(db.String(500), default='')  # Будем хранить достижения как строку, разделенную запятыми
 
 class Test(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -43,6 +44,17 @@ class Option(db.Model):
     content = db.Column(db.String(200), nullable=False)
     is_correct = db.Column(db.Boolean, default=False, nullable=False)
     question_id = db.Column(db.Integer, db.ForeignKey('question.id'), nullable=False)
+
+class TestResult(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    test_id = db.Column(db.Integer, db.ForeignKey('test.id'), nullable=False)
+    score = db.Column(db.Integer, nullable=False)
+    total_questions = db.Column(db.Integer, nullable=False)
+    date_completed = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+
+    user = db.relationship('User', backref=db.backref('test_results', lazy=True))
+    test = db.relationship('Test', backref=db.backref('results', lazy=True))
 
 @app.route('/register', methods=['POST'])
 def register():
@@ -123,6 +135,17 @@ def submit_test(test_id):
         user.level += 1
         user.experience -= 500
 
+    # Сохраняем результат теста
+    test_result = TestResult(
+        user_id=user.id,
+        test_id=test_id,
+        score=correct_answers,
+        total_questions=total_questions
+    )
+    db.session.add(test_result)
+
+    new_achievements = check_and_update_achievements(user)
+
     db.session.commit()
 
     return jsonify({
@@ -130,14 +153,38 @@ def submit_test(test_id):
         'total_questions': total_questions,
         'experience_gained': experience_gained,
         'current_experience': user.experience,
-        'current_level': user.level
+        'current_level': user.level,
+        'new_achievements': new_achievements
     }), 200
+
+
+def check_and_update_achievements(user):
+    new_achievements = []
+    all_achievements = [
+        ('tests_novice', 'Completed 5 tests', lambda u: u.tests_completed >= 5),
+        ('tests_pro', 'Completed 20 tests', lambda u: u.tests_completed >= 20),
+        ('accuracy_master', 'Achieved 80% accuracy',
+         lambda u: (u.correct_answers / u.total_answers >= 0.8) if u.total_answers > 0 else False),
+        ('level_5', 'Reached level 5', lambda u: u.level >= 5),
+        ('perfect_test', 'Got 100% on a test', lambda u: u.correct_answers == u.total_answers and u.total_answers > 0)
+    ]
+
+    current_achievements = set(user.achievements.split(',')) if user.achievements else set()
+
+    for ach_id, ach_name, ach_check in all_achievements:
+        if ach_id not in current_achievements and ach_check(user):
+            current_achievements.add(ach_id)
+            new_achievements.append(ach_name)
+
+    user.achievements = ','.join(current_achievements)
+    return new_achievements
 
 @app.route('/profile', methods=['GET'])
 @jwt_required()
 def get_profile():
     current_user_id = get_jwt_identity()
     user = User.query.get(current_user_id)
+    achievements = user.achievements.split(',') if user.achievements else []
     return jsonify({
         'username': user.username,
         'experience': user.experience,
@@ -145,8 +192,28 @@ def get_profile():
         'tests_completed': user.tests_completed,
         'correct_answers': user.correct_answers,
         'total_answers': user.total_answers,
-        'accuracy': (user.correct_answers / user.total_answers * 100) if user.total_answers > 0 else 0
+        'accuracy': (user.correct_answers / user.total_answers * 100) if user.total_answers > 0 else 0,
+        'achievements': achievements
     }), 200
+
+
+@app.route('/test-history', methods=['GET'])
+@jwt_required()
+def get_test_history():
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+
+    test_results = TestResult.query.filter_by(user_id=user.id).order_by(TestResult.date_completed.desc()).all()
+
+    history = [{
+        'test_id': result.test_id,
+        'test_title': result.test.title,
+        'score': result.score,
+        'total_questions': result.total_questions,
+        'date_completed': result.date_completed.isoformat()
+    } for result in test_results]
+
+    return jsonify(history), 200
 
 def create_sample_data():
     if not Test.query.first():

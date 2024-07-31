@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import Auth from './components/Auth';
 import TestList from './components/TestList';
 import Profile from './components/Profile';
+import TestHistory from './components/TestHistory';
 
 function App() {
   const [token, setToken] = useState(null);
   const [user, setUser] = useState(null);
-  const [showProfile, setShowProfile] = useState(false);
+  const [currentView, setCurrentView] = useState('tests');
 
   const handleTestComplete = (result) => {
     setUser(prevUser => ({
@@ -27,16 +28,14 @@ function App() {
             <div className="user-info">
               <p>Level: {user.level}</p>
               <p>Experience: {user.experience}</p>
-              <button onClick={() => setShowProfile(!showProfile)}>
-                {showProfile ? 'Hide Profile' : 'Show Profile'}
-              </button>
+              <button onClick={() => setCurrentView('tests')}>Tests</button>
+              <button onClick={() => setCurrentView('profile')}>Profile</button>
+              <button onClick={() => setCurrentView('history')}>History</button>
             </div>
           )}
-          {showProfile ? (
-            <Profile token={token} />
-          ) : (
-            <TestList token={token} onTestComplete={handleTestComplete} />
-          )}
+          {currentView === 'tests' && <TestList token={token} onTestComplete={handleTestComplete} />}
+          {currentView === 'profile' && <Profile token={token} />}
+          {currentView === 'history' && <TestHistory token={token} />}
         </>
       )}
     </div>
