@@ -21,16 +21,27 @@ function Profile({ token }) {
 
   if (!profile) return <div>Loading profile...</div>;
 
+  const experiencePercentage = (profile.experience / 500) * 100;
+
+const getAccuracyColor = (accuracy) => {
+  if (accuracy >= 80) return '#4caf50';  // зеленый
+  if (accuracy >= 60) return '#ffc107';  // желтый
+  return '#f44336';  // красный
+};
+
   return (
     <div className="profile">
       <h2>User Profile</h2>
       <p>Username: {profile.username}</p>
-      <p>Level: {profile.level}</p>
-      <p>Experience: {profile.experience}/500</p>
+      <p>Level: <span className="level">{profile.level}</span></p>
+      <div className="experience-bar">
+        <div className="experience-progress" style={{ width: `${experiencePercentage}%` }}></div>
+        <span className="experience-text">Experience: {profile.experience}/500</span>
+      </div>
       <p>Tests Completed: {profile.tests_completed}</p>
       <p>Correct Answers: {profile.correct_answers}</p>
       <p>Total Answers: {profile.total_answers}</p>
-      <p>Accuracy: {profile.accuracy.toFixed(2)}%</p>
+      <p>Accuracy: <span style={{ color: getAccuracyColor(profile.accuracy) }}>{profile.accuracy.toFixed(2)}%</span></p>
     </div>
   );
 }

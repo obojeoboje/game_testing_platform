@@ -96,3 +96,47 @@ input[type="text"], input[type="password"] {
 .profile p {
   margin-bottom: 10px;
 }
+
+.experience-bar {
+  width: 100%;
+  height: 20px;
+  background-color: #e0e0e0;
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 10px;
+}
+
+.experience-progress {
+  height: 100%;
+  background-color: #4caf50;
+  transition: width 0.5s ease-in-out;
+}
+
+.experience-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #000;
+  font-weight: bold;
+}
+
+@keyframes levelPulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.level {
+  display: inline-block;
+  animation: levelPulse 2s infinite;
+  font-weight: bold;
+  color: #3f51b5;
+}
