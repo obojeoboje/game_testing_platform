@@ -2,49 +2,71 @@ import React, { useState, useEffect } from 'react';
 import './TestModal.css';
 
 function TestModal({ test, onSave, onClose }) {
-  const [testData, setTestData] = useState(test || { title: '', questions: [] });
+  const [testData, setTestData] = useState(null);
 
   useEffect(() => {
     if (test) {
+      console.log('Initializing test data:', JSON.stringify(test, null, 2));
       setTestData(test);
+    } else {
+      setTestData({ title: '', questions: [] });
     }
   }, [test]);
 
-  const addQuestion = () => {
-    setTestData({
-      ...testData,
-      questions: [...testData.questions, { content: '', options: [] }]
+  const updateOption = (questionIndex, optionIndex, field, value) => {
+    setTestData(prevData => {
+      const newData = JSON.parse(JSON.stringify(prevData)); // Глубокое клонирование
+      if (field === 'is_correct') {
+        newData.questions[questionIndex].options.forEach((opt, idx) => {
+          opt.is_correct = idx === optionIndex ? value : false;
+        });
+      } else {
+        newData.questions[questionIndex].options[optionIndex][field] = value;
+      }
+      console.log('Updated test data:', newData); // Отладочный вывод
+      return newData;
     });
   };
 
+  const addQuestion = () => {
+    setTestData(prevData => ({
+      ...prevData,
+      questions: [...prevData.questions, { content: '', options: [] }]
+    }));
+  };
+
   const updateQuestion = (index, field, value) => {
-    const updatedQuestions = [...testData.questions];
-    updatedQuestions[index][field] = value;
-    setTestData({ ...testData, questions: updatedQuestions });
+    setTestData(prevData => {
+      const newData = { ...prevData };
+      newData.questions[index][field] = value;
+      return newData;
+    });
   };
 
   const addOption = (questionIndex) => {
-    const updatedQuestions = [...testData.questions];
-    updatedQuestions[questionIndex].options.push({ content: '', is_correct: false });
-    setTestData({ ...testData, questions: updatedQuestions });
-  };
-
-  const updateOption = (questionIndex, optionIndex, field, value) => {
-    const updatedQuestions = [...testData.questions];
-    updatedQuestions[questionIndex].options[optionIndex][field] = value;
-    setTestData({ ...testData, questions: updatedQuestions });
+    setTestData(prevData => {
+      const newData = { ...prevData };
+      newData.questions[questionIndex].options.push({ content: '', is_correct: false });
+      return newData;
+    });
   };
 
   const removeQuestion = (index) => {
-    const updatedQuestions = testData.questions.filter((_, i) => i !== index);
-    setTestData({ ...testData, questions: updatedQuestions });
+    setTestData(prevData => ({
+      ...prevData,
+      questions: prevData.questions.filter((_, i) => i !== index)
+    }));
   };
 
   const removeOption = (questionIndex, optionIndex) => {
-    const updatedQuestions = [...testData.questions];
-    updatedQuestions[questionIndex].options = updatedQuestions[questionIndex].options.filter((_, i) => i !== optionIndex);
-    setTestData({ ...testData, questions: updatedQuestions });
+    setTestData(prevData => {
+      const newData = { ...prevData };
+      newData.questions[questionIndex].options = newData.questions[questionIndex].options.filter((_, i) => i !== optionIndex);
+      return newData;
+    });
   };
+
+  if (!testData) return null;
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -79,7 +101,7 @@ function TestModal({ test, onSave, onClose }) {
                 <label>
                   <input
                     type="checkbox"
-                    checked={option.is_correct}
+                    checked={option.is_correct === true}
                     onChange={(e) => updateOption(qIndex, oIndex, 'is_correct', e.target.checked)}
                   />
                   Правильный

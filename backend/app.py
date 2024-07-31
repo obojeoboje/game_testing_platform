@@ -123,8 +123,7 @@ def get_test(test_id):
     test = Test.query.get_or_404(test_id)
     questions = []
     for question in test.questions:
-        options = [{'id': option.id, 'content': option.content} for option in question.options]
-        random.shuffle(options)  # Перемешиваем варианты ответов
+        options = [{'id': option.id, 'content': option.content, 'is_correct': option.is_correct} for option in question.options]
         questions.append({
             'id': question.id,
             'content': question.content,

@@ -34,6 +34,7 @@ function TestManagement({ token }) {
       const response = await axios.get(`http://localhost:5000/tests/${testId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      console.log('Fetched test data:', JSON.stringify(response.data, null, 2));
       setCurrentTest(response.data);
       setIsModalOpen(true);
     } catch (error) {
@@ -56,6 +57,7 @@ function TestManagement({ token }) {
 
   const handleSaveTest = async (testData) => {
     try {
+      console.log('Saving test data:', testData); // Отладочный вывод
       if (testData.id) {
         await axios.put(`http://localhost:5000/tests/${testData.id}`, testData, {
           headers: { Authorization: `Bearer ${token}` }
