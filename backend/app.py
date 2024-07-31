@@ -25,6 +25,7 @@ class User(db.Model):
     correct_answers = db.Column(db.Integer, default=0)
     total_answers = db.Column(db.Integer, default=0)
     achievements = db.Column(db.String(500), default='')  # Будем хранить достижения как строку, разделенную запятыми
+    is_admin = db.Column(db.Boolean, default=False)
 
 class Test(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -71,7 +72,7 @@ def login():
     user = User.query.filter_by(username=data['username']).first()
     if user and bcrypt.check_password_hash(user.password, data['password']):
         access_token = create_access_token(identity=user.id)
-        return jsonify(access_token=access_token), 200
+        return jsonify(access_token=access_token, is_admin=user.is_admin), 200
     return jsonify({"message": "Invalid username or password"}), 401
 
 @app.route('/protected', methods=['GET'])
@@ -86,6 +87,35 @@ def protected():
 def get_tests():
     tests = Test.query.all()
     return jsonify([{'id': test.id, 'title': test.title} for test in tests]), 200
+
+
+@app.route('/tests', methods=['POST'])
+@jwt_required()
+def create_test():
+    current_user_id = get_jwt_identity()
+    if not is_admin(current_user_id):
+        return jsonify({"msg": "Admin access required"}), 403
+
+    data = request.json
+    new_test = Test(title=data['title'])
+    db.session.add(new_test)
+    db.session.commit()
+
+    for question_data in data['questions']:
+        question = Question(content=question_data['content'], test_id=new_test.id)
+        db.session.add(question)
+        db.session.commit()
+
+        for option_data in question_data['options']:
+            option = Option(
+                content=option_data['content'],
+                is_correct=option_data['is_correct'],
+                question_id=question.id
+            )
+            db.session.add(option)
+
+    db.session.commit()
+    return jsonify({"msg": "Test created successfully", "test_id": new_test.id}), 201
 
 @app.route('/tests/<int:test_id>', methods=['GET'])
 @jwt_required()
@@ -105,6 +135,62 @@ def get_test(test_id):
         'title': test.title,
         'questions': questions
     }), 200
+
+
+@app.route('/tests/<int:test_id>', methods=['PUT'])
+@jwt_required()
+def update_test(test_id):
+    current_user_id = get_jwt_identity()
+    if not is_admin(current_user_id):
+        return jsonify({"msg": "Admin access required"}), 403
+
+    test = Test.query.get_or_404(test_id)
+    data = request.json
+
+    test.title = data['title']
+
+    # Удаляем существующие вопросы и варианты ответов
+    for question in test.questions:
+        for option in question.options:
+            db.session.delete(option)
+        db.session.delete(question)
+
+    # Добавляем новые вопросы и варианты ответов
+    for question_data in data['questions']:
+        question = Question(content=question_data['content'], test_id=test.id)
+        db.session.add(question)
+        db.session.commit()
+
+        for option_data in question_data['options']:
+            option = Option(
+                content=option_data['content'],
+                is_correct=option_data['is_correct'],
+                question_id=question.id
+            )
+            db.session.add(option)
+
+    db.session.commit()
+    return jsonify({"msg": "Test updated successfully"}), 200
+
+
+@app.route('/tests/<int:test_id>', methods=['DELETE'])
+@jwt_required()
+def delete_test(test_id):
+    current_user_id = get_jwt_identity()
+    if not is_admin(current_user_id):
+        return jsonify({"msg": "Admin access required"}), 403
+
+    test = Test.query.get_or_404(test_id)
+
+    for question in test.questions:
+        for option in question.options:
+            db.session.delete(option)
+        db.session.delete(question)
+
+    db.session.delete(test)
+    db.session.commit()
+
+    return jsonify({"msg": "Test deleted successfully"}), 200
 
 
 @app.route('/tests/<int:test_id>/submit', methods=['POST'])
@@ -215,6 +301,10 @@ def get_test_history():
 
     return jsonify(history), 200
 
+def is_admin(user_id):
+    user = User.query.get(user_id)
+    return user.is_admin if user else False
+
 def create_sample_data():
     if not Test.query.first():
         test = Test(title="Основы тестирования")
@@ -234,8 +324,18 @@ def create_sample_data():
         db.session.add_all(options1)
         db.session.commit()
 
+def create_admin():
+    admin = User.query.filter_by(username='admin').first()
+    if not admin:
+        hashed_password = bcrypt.generate_password_hash('adminpassword').decode('utf-8')
+        admin = User(username='admin', password=hashed_password, is_admin=True)
+        db.session.add(admin)
+        db.session.commit()
+        print('Admin user created')
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
         create_sample_data()
+        create_admin()
     app.run(debug=True)

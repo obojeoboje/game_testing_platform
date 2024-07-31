@@ -13,7 +13,13 @@ function Auth({ setToken, setUser }) {
       const response = await axios.post(`http://localhost:5000${endpoint}`, { username, password });
       if (response.data.access_token) {
         setToken(response.data.access_token);
-        setUser({ username, experience: 0, level: 1 });
+        // Убедитесь, что вы устанавливаете все необходимые поля пользователя
+        setUser({ 
+          username: response.data.username,
+          level: response.data.level,
+          experience: response.data.experience,
+          is_admin: response.data.is_admin
+        });
       }
     } catch (error) {
       console.error('An error occurred:', error);
