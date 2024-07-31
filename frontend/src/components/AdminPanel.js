@@ -37,6 +37,24 @@ function AdminPanel({ token }) {
     }
   };
 
+  const fetchTestDetails = async (testId) => {
+    try {
+      const response = await axios.get(`http://localhost:5000/tests/${testId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      console.log('Fetched test details:', response.data);
+      // Добавьте эту проверку
+      response.data.questions.forEach(question => {
+        question.options.forEach(option => {
+          console.log(`Option ${option.content} is_correct:`, option.is_correct);
+        });
+      });
+      return response.data;
+    } catch (error) {
+      console.error('An error occurred while fetching test details:', error);
+    }
+  };
+
   const handleCreateTest = async () => {
     try {
       await axios.post('http://localhost:5000/tests', newTest, {
@@ -51,6 +69,7 @@ function AdminPanel({ token }) {
 
   const handleUpdateTest = async () => {
     try {
+      console.log('Updating test with data:', editingTest);
       await axios.put(`http://localhost:5000/tests/${editingTest.id}`, editingTest, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -125,7 +144,7 @@ function AdminPanel({ token }) {
               />
               <input
                 type="checkbox"
-                checked={option.is_correct}
+                checked={option.is_correct || false}
                 onChange={(e) => updateOption(test, setTest, qIndex, oIndex, 'is_correct', e.target.checked)}
               /> Correct
             </div>
@@ -152,7 +171,11 @@ function AdminPanel({ token }) {
       {tests.map(test => (
         <div key={test.id}>
           <h4>{test.title}</h4>
-          <button onClick={() => setEditingTest(test)}>Edit</button>
+          <button onClick={async () => {
+            console.log('Fetching details for test:', test.id);
+            const testDetails = await fetchTestDetails(test.id);
+            setEditingTest(testDetails);
+          }}>Edit</button>
           <button onClick={() => handleDeleteTest(test.id)}>Delete</button>
         </div>
       ))}

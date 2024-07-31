@@ -159,18 +159,23 @@ def update_test(test_id):
     for question_data in data['questions']:
         question = Question(content=question_data['content'], test_id=test.id)
         db.session.add(question)
-        db.session.commit()
+        db.session.flush()  # Чтобы получить id нового вопроса
 
         for option_data in question_data['options']:
             option = Option(
                 content=option_data['content'],
-                is_correct=option_data['is_correct'],
+                is_correct=option_data.get('is_correct', False),  # Явно устанавливаем is_correct
                 question_id=question.id
             )
             db.session.add(option)
 
-    db.session.commit()
-    return jsonify({"msg": "Test updated successfully"}), 200
+    try:
+        db.session.commit()
+        return jsonify({"msg": "Test updated successfully"}), 200
+    except Exception as e:
+        db.session.rollback()
+        app.logger.error(f"Error updating test: {str(e)}")
+        return jsonify({"msg": "An error occurred while updating the test"}), 500
 
 
 @app.route('/tests/<int:test_id>', methods=['DELETE'])
