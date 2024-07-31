@@ -5,6 +5,7 @@ from flask_jwt_extended import JWTManager, create_access_token, jwt_required, ge
 from flask_cors import CORS
 from datetime import timedelta, datetime
 import random
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
@@ -26,6 +27,12 @@ class User(db.Model):
     total_answers = db.Column(db.Integer, default=0)
     achievements = db.Column(db.String(500), default='')  # Будем хранить достижения как строку, разделенную запятыми
     is_admin = db.Column(db.Boolean, default=False)
+
+    def set_password(self, password):
+        self.password = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password, password)
 
 class Test(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -66,11 +73,12 @@ def register():
     db.session.commit()
     return jsonify({"message": "User created successfully"}), 201
 
+
 @app.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
     user = User.query.filter_by(username=data['username']).first()
-    if user and bcrypt.check_password_hash(user.password, data['password']):
+    if user and user.check_password(data['password']):
         access_token = create_access_token(identity=user.id)
         return jsonify(access_token=access_token, is_admin=user.is_admin), 200
     return jsonify({"message": "Invalid username or password"}), 401
@@ -305,6 +313,54 @@ def get_test_history():
 
     return jsonify(history), 200
 
+@app.route('/users', methods=['GET'])
+@jwt_required()
+def get_users():
+    current_user = get_jwt_identity()
+    if not is_admin(current_user):
+        return jsonify({"msg": "Admin access required"}), 403
+    users = User.query.all()
+    return jsonify([{"id": user.id, "username": user.username, "is_admin": user.is_admin} for user in users]), 200
+
+@app.route('/users', methods=['POST'])
+@jwt_required()
+def create_user():
+    current_user_id = get_jwt_identity()
+    if not is_admin(current_user_id):
+        return jsonify({"msg": "Admin access required"}), 403
+    data = request.json
+    new_user = User(username=data['username'], is_admin=data.get('is_admin', False))
+    new_user.set_password(data['password'])
+    db.session.add(new_user)
+    db.session.commit()
+    return jsonify({"msg": "User created successfully"}), 201
+
+@app.route('/users/<int:user_id>', methods=['PUT'])
+@jwt_required()
+def update_user(user_id):
+    current_user_id = get_jwt_identity()
+    if not is_admin(current_user_id):
+        return jsonify({"msg": "Admin access required"}), 403
+    user = User.query.get_or_404(user_id)
+    data = request.json
+    user.username = data.get('username', user.username)
+    user.is_admin = data.get('is_admin', user.is_admin)
+    if 'password' in data:
+        user.set_password(data['password'])
+    db.session.commit()
+    return jsonify({"msg": "User updated successfully"}), 200
+
+@app.route('/users/<int:user_id>', methods=['DELETE'])
+@jwt_required()
+def delete_user(user_id):
+    current_user = get_jwt_identity()
+    if not is_admin(current_user):
+        return jsonify({"msg": "Admin access required"}), 403
+    user = User.query.get_or_404(user_id)
+    db.session.delete(user)
+    db.session.commit()
+    return jsonify({"msg": "User deleted successfully"}), 200
+
 def is_admin(user_id):
     user = User.query.get(user_id)
     return user.is_admin if user else False
@@ -328,18 +384,28 @@ def create_sample_data():
         db.session.add_all(options1)
         db.session.commit()
 
+def update_all_passwords():
+    users = User.query.all()
+    for user in users:
+        if not user.password.startswith('pbkdf2:sha256:') and not user.password.startswith('scrypt:'):
+            user.set_password(user.password)
+    db.session.commit()
+
 def create_admin():
     admin = User.query.filter_by(username='admin').first()
     if not admin:
-        hashed_password = bcrypt.generate_password_hash('adminpassword').decode('utf-8')
-        admin = User(username='admin', password=hashed_password, is_admin=True)
+        admin = User(username='admin', is_admin=True)
+        admin.set_password('adminpassword')
         db.session.add(admin)
         db.session.commit()
         print('Admin user created')
+    else:
+        print('Admin user already exists')
 
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
         create_sample_data()
+        update_all_passwords()
         create_admin()
     app.run(debug=True)
