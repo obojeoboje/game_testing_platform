@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import TestManagement from './TestManagement';
-import UserManagement from './UserManagement';
-import Statistics from './Statistics';
+import TestManagement from '../components/TestManagement';
+import UserManagement from '../components/UserManagement';
+import Statistics from '../components/Statistics';
 
 function AdminPanel({ token }) {
   const [activeSection, setActiveSection] = useState('tests');

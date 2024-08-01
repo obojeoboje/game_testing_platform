@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './TestModal.css';
+import '../TestModal/TestModal.css';
 
 function TestModal({ test, onSave, onClose }) {
   const [testData, setTestData] = useState(null);

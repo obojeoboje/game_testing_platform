@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
+import Question from '../components/Question';
+import Result from '../components/Result';
 
 function Test({ testId, token, onTestComplete }) {
   const [test, setTest] = useState(null);
@@ -21,7 +23,6 @@ function Test({ testId, token, onTestComplete }) {
     fetchTest();
   }, [testId, token]);
 
-  // Используем useMemo для сохранения порядка вариантов ответов
   const memoizedQuestions = useMemo(() => test?.questions || [], [test]);
 
   const handleAnswerChange = (questionId, optionId) => {
@@ -50,50 +51,19 @@ function Test({ testId, token, onTestComplete }) {
   if (!test) return <div>Loading...</div>;
 
   if (result) {
-    return (
-      <div className="result">
-        <h3>Test Results:</h3>
-        <p>Correct Answers: {result.correct_answers}</p>
-        <p>Total Questions: {result.total_questions}</p>
-        <p>Experience Gained: {result.experience_gained}</p>
-        <p>Current Experience: {result.current_experience}</p>
-        <p>Current Level: {result.current_level}</p>
-        {result.new_achievements && result.new_achievements.length > 0 && (
-          <div>
-            <h4>New Achievements:</h4>
-            <ul>
-              {result.new_achievements.map((achievement, index) => (
-                <li key={index} className="achievement">{achievement}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-        <button onClick={handleFinish}>Back to Test List</button>
-      </div>
-    );
+    return <Result result={result} onFinish={handleFinish} />;
   }
 
   return (
     <div>
       <h2>{test.title}</h2>
       {memoizedQuestions.map(question => (
-        <div key={question.id} className="question">
-          <p>{question.content}</p>
-          <div className="options">
-            {question.options.map(option => (
-              <label key={option.id} className="option">
-                <input
-                  type="radio"
-                  name={`question_${question.id}`}
-                  value={option.id}
-                  onChange={() => handleAnswerChange(question.id, option.id)}
-                  checked={answers[question.id] === option.id}
-                />
-                {option.content}
-              </label>
-            ))}
-          </div>
-        </div>
+        <Question
+          key={question.id}
+          question={question}
+          onAnswerChange={handleAnswerChange}
+          selectedAnswer={answers[question.id]}
+        />
       ))}
       <button onClick={handleSubmit}>Submit Test</button>
     </div>

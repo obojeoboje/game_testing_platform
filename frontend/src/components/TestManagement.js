@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import TestCard from './TestCard';
-import TestModal from './TestModal';
+import TestModal from './TestModal/TestModal';
 
 function TestManagement({ token }) {
   const [tests, setTests] = useState([]);

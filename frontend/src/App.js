@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import Auth from './components/Auth';
-import TestList from './components/TestList';
-import Profile from './components/Profile';
-import TestHistory from './components/TestHistory';
-import AdminPanel from './components/AdminPanel';
+import TestList from './pages/TestList';
+import Profile from './pages/Profile';
+import TestHistory from './pages/TestHistory';
+import AdminPanel from './pages/AdminPanel';
 
 function App() {
   const [token, setToken] = useState(null);
