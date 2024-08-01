@@ -28,21 +28,15 @@ function TestList({ token, onTestComplete }) {
 
   return (
     <div>
-      {selectedTest ? (
-        <Test testId={selectedTest} token={token} onTestComplete={handleTestComplete} />
-      ) : (
-        <>
-          <h2>Available Tests</h2>
-          <ul className="test-list">
-            {tests.map(test => (
-              <li key={test.id} className="test-item">
-                {test.title}
-                <button onClick={() => setSelectedTest(test.id)}>Start Test</button>
-              </li>
-            ))}
-          </ul>
-        </>
-      )}
+      <h2>Доступные тесты</h2>
+      <div className="test-list">
+        {tests.map(test => (
+          <div key={test.id} className="test-item">
+            <h3>{test.title}</h3>
+            <button onClick={() => setSelectedTest(test.id)}>Начать тест</button>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

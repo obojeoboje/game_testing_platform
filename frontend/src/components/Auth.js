@@ -27,25 +27,25 @@ function Auth({ setToken, setUser }) {
   };
 
   return (
-    <div>
-      <h2>{isLogin ? 'Login' : 'Register'}</h2>
+    <div className="card auth-card">
+      <h2>{isLogin ? 'Вход' : 'Регистрация'}</h2>
       <form onSubmit={handleSubmit}>
         <input
           type="text"
-          placeholder="Username"
+          placeholder="Имя пользователя"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
         />
         <input
           type="password"
-          placeholder="Password"
+          placeholder="Пароль"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
-        <button type="submit">{isLogin ? 'Login' : 'Register'}</button>
+        <button type="submit">{isLogin ? 'Войти' : 'Зарегистрироваться'}</button>
       </form>
-      <button onClick={() => setIsLogin(!isLogin)}>
-        {isLogin ? 'Need to register?' : 'Already have an account?'}
+      <button onClick={() => setIsLogin(!isLogin)} className="switch-auth">
+        {isLogin ? 'Нужно зарегистрироваться?' : 'Уже есть аккаунт?'}
       </button>
     </div>
   );

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { FaStar, FaTrophy, FaCheckCircle } from 'react-icons/fa';
+import './Profile.css';
 
 function Profile({ token }) {
   const [profile, setProfile] = useState(null);
@@ -19,35 +21,44 @@ function Profile({ token }) {
     fetchProfile();
   }, [token]);
 
-  if (!profile) return <div>Loading profile...</div>;
+  if (!profile) return <div className="loading">Loading profile...</div>;
 
   const experiencePercentage = (profile.experience / 500) * 100;
 
-  const getAccuracyColor = (accuracy) => {
-    if (accuracy >= 80) return '#4caf50';
-    if (accuracy >= 60) return '#ffc107';
-    return '#f44336';
-  };
-
   return (
     <div className="profile">
-      <h2>User Profile</h2>
-      <p>Username: {profile.username}</p>
-      <p>Level: <span className="level">{profile.level}</span></p>
-      <div className="experience-bar">
-        <div className="experience-progress" style={{ width: `${experiencePercentage}%` }}></div>
-        <span className="experience-text">Experience: {profile.experience}/500</span>
+      <h2>Профиль пользователя</h2>
+      <div className="profile-card">
+        <div className="profile-header">
+          <h3>{profile.username}</h3>
+          <div className="level">
+            <FaStar className="level-icon" />
+            <span>Уровень {profile.level}</span>
+          </div>
+        </div>
+        <div className="experience-bar">
+          <div className="experience-progress" style={{ width: `${experiencePercentage}%` }}></div>
+          <span className="experience-text">{profile.experience}/500 XP</span>
+        </div>
+        <div className="profile-stats">
+          <div className="stat">
+            <FaTrophy className="stat-icon" />
+            <span>Тестов пройдено: {profile.tests_completed}</span>
+          </div>
+          <div className="stat">
+            <FaCheckCircle className="stat-icon" />
+            <span>Точность: {profile.accuracy.toFixed(2)}%</span>
+          </div>
+        </div>
+        <div className="achievements">
+          <h4>Достижения</h4>
+          <ul>
+            {profile.achievements.map((achievement, index) => (
+              <li key={index}>{achievement}</li>
+            ))}
+          </ul>
+        </div>
       </div>
-      <p>Tests Completed: {profile.tests_completed}</p>
-      <p>Correct Answers: {profile.correct_answers}</p>
-      <p>Total Answers: {profile.total_answers}</p>
-      <p>Accuracy: <span style={{ color: getAccuracyColor(profile.accuracy) }}>{profile.accuracy.toFixed(2)}%</span></p>
-      <h3>Achievements</h3>
-      <ul className="achievements-list">
-        {profile.achievements.map((achievement, index) => (
-          <li key={index} className="achievement">{achievement}</li>
-        ))}
-      </ul>
     </div>
   );
 }

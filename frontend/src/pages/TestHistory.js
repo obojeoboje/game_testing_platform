@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { FaCheckCircle, FaTimesCircle, FaRegClock } from 'react-icons/fa';
+import './TestHistory.css';
 
 function TestHistory({ token }) {
   const [history, setHistory] = useState([]);
@@ -21,25 +23,35 @@ function TestHistory({ token }) {
 
   return (
     <div className="test-history">
-      <h2>Test History</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Test</th>
-            <th>Score</th>
-          </tr>
-        </thead>
-        <tbody>
-          {history.map((result, index) => (
-            <tr key={index}>
-              <td>{new Date(result.date_completed).toLocaleDateString()}</td>
-              <td>{result.test_title}</td>
-              <td>{result.score}/{result.total_questions}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <h2>История тестов</h2>
+      <div className="history-cards">
+        {history.map((result, index) => (
+          <div key={index} className="history-card">
+            <div className="card-header">
+              <h3>{result.test_title}</h3>
+              <span className="date">
+                <FaRegClock /> {new Date(result.date_completed).toLocaleDateString()}
+              </span>
+            </div>
+            <div className="card-body">
+              <div className="score">
+                {result.score >= result.total_questions / 2 ? (
+                  <FaCheckCircle className="icon-pass" />
+                ) : (
+                  <FaTimesCircle className="icon-fail" />
+                )}
+                <span>{result.score}/{result.total_questions}</span>
+              </div>
+              <div className="progress-bar">
+                <div 
+                  className="progress" 
+                  style={{width: `${(result.score / result.total_questions) * 100}%`}}
+                ></div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

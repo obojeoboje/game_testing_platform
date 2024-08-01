@@ -19,29 +19,32 @@ function App() {
   };
 
   return (
-    <div className="container">
+    <div className="app">
       <h1>Геймифицированное обучение тестированию</h1>
       {!token ? (
         <Auth setToken={setToken} setUser={setUser} />
       ) : (
         <>
+          <nav className="navbar">
+            <ul>
+              <li><a href="#" onClick={() => setCurrentView('tests')}>Тесты</a></li>
+              <li><a href="#" onClick={() => setCurrentView('profile')}>Профиль</a></li>
+              <li><a href="#" onClick={() => setCurrentView('history')}>История</a></li>
+              {user && user.is_admin && <li><a href="#" onClick={() => setCurrentView('admin')}>Админ панель</a></li>}
+            </ul>
+          </nav>
           {user && (
             <div className="user-info">
-              <p>Level: {user.level}</p>
-              <p>Experience: {user.experience}</p>
-              <button onClick={() => setCurrentView('tests')}>Tests</button>
-              <button onClick={() => setCurrentView('profile')}>Profile</button>
-              <button onClick={() => setCurrentView('history')}>History</button>
-              {user.is_admin && (
-                <button onClick={() => setCurrentView('admin')}>Admin Panel</button>
-              )}
+              <p>Уровень: {user.level}</p>
+              <p>Опыт: {user.experience}</p>
             </div>
           )}
-          
-          {currentView === 'tests' && <TestList token={token} onTestComplete={handleTestComplete} />}
-          {currentView === 'profile' && user && <Profile token={token} />}
-          {currentView === 'history' && user && <TestHistory token={token} />}
-          {currentView === 'admin' && user && user.is_admin && <AdminPanel token={token} />}
+          <div className="container">
+            {currentView === 'tests' && <TestList token={token} onTestComplete={handleTestComplete} />}
+            {currentView === 'profile' && user && <Profile token={token} />}
+            {currentView === 'history' && user && <TestHistory token={token} />}
+            {currentView === 'admin' && user && user.is_admin && <AdminPanel token={token} />}
+          </div>
         </>
       )}
     </div>
