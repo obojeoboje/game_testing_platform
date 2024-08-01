@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import Test from './Test';
+import Test from './Test';  // Добавьте этот импорт
 
 function TestList({ token, onTestComplete }) {
   const [tests, setTests] = useState([]);
@@ -29,14 +29,25 @@ function TestList({ token, onTestComplete }) {
   return (
     <div>
       <h2>Доступные тесты</h2>
-      <div className="test-list">
-        {tests.map(test => (
-          <div key={test.id} className="test-item">
-            <h3>{test.title}</h3>
-            <button onClick={() => setSelectedTest(test.id)}>Начать тест</button>
-          </div>
-        ))}
-      </div>
+      {selectedTest ? (
+        <Test 
+          testId={selectedTest} 
+          token={token} 
+          onTestComplete={(result) => {
+            handleTestComplete(result);
+            setSelectedTest(null);
+          }} 
+        />
+      ) : (
+        <div className="test-list">
+          {tests.map(test => (
+            <div key={test.id} className="test-item">
+              <h3>{test.title}</h3>
+              <button onClick={() => setSelectedTest(test.id)}>Начать тест</button>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

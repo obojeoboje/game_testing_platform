@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import Question from '../components/Question';
 import Result from '../components/Result';
+import './Test.css';
 
 function Test({ testId, token, onTestComplete }) {
   const [test, setTest] = useState(null);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState({});
   const [result, setResult] = useState(null);
 
@@ -23,17 +24,18 @@ function Test({ testId, token, onTestComplete }) {
     fetchTest();
   }, [testId, token]);
 
-  const memoizedQuestions = useMemo(() => test?.questions || [], [test]);
-
-  const handleAnswerChange = (questionId, optionId) => {
-    setAnswers(prev => ({ ...prev, [questionId]: optionId }));
+  const handleAnswer = (optionId) => {
+    setAnswers({...answers, [currentQuestionIndex]: optionId});
+    if (currentQuestionIndex < test.questions.length - 1) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+    }
   };
 
   const handleSubmit = async () => {
     try {
       const response = await axios.post(
         `http://localhost:5000/tests/${testId}/submit`,
-        { answers: Object.entries(answers).map(([questionId, optionId]) => ({ question_id: parseInt(questionId), option_id: optionId })) },
+        { answers: Object.values(answers).map((optionId, index) => ({ question_id: test.questions[index].id, option_id: optionId })) },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setResult(response.data);
@@ -42,30 +44,34 @@ function Test({ testId, token, onTestComplete }) {
     }
   };
 
-  const handleFinish = () => {
-    if (onTestComplete) {
-      onTestComplete(result);
-    }
-  };
+  if (!test) return <div className="loading">Loading test...</div>;
+  if (result) return <Result result={result} onFinish={() => onTestComplete(result)} />;
 
-  if (!test) return <div>Loading...</div>;
-
-  if (result) {
-    return <Result result={result} onFinish={handleFinish} />;
-  }
+  const currentQuestion = test.questions[currentQuestionIndex];
 
   return (
-    <div>
-      <h2>{test.title}</h2>
-      {memoizedQuestions.map(question => (
-        <Question
-          key={question.id}
-          question={question}
-          onAnswerChange={handleAnswerChange}
-          selectedAnswer={answers[question.id]}
-        />
-      ))}
-      <button onClick={handleSubmit}>Submit Test</button>
+    <div className="test-container">
+      <h2 className="test-title">{test.title}</h2>
+      <div className="question-container">
+        <h3 className="question-text">{currentQuestion.content}</h3>
+        <div className="options-container">
+          {currentQuestion.options.map(option => (
+            <button 
+              key={option.id} 
+              className={`option-button ${answers[currentQuestionIndex] === option.id ? 'selected' : ''}`}
+              onClick={() => handleAnswer(option.id)}
+            >
+              {option.content}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="navigation">
+        <span className="question-counter">{currentQuestionIndex + 1} / {test.questions.length}</span>
+        {currentQuestionIndex === test.questions.length - 1 && (
+          <button className="submit-button" onClick={handleSubmit}>Завершить тест</button>
+        )}
+      </div>
     </div>
   );
 }

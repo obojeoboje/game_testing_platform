@@ -1,25 +1,39 @@
 import React from 'react';
+import './Result.css'; // Убедитесь, что вы создадите этот файл
 
 function Result({ result, onFinish }) {
   return (
-    <div className="result">
-      <h3>Test Results:</h3>
-      <p>Correct Answers: {result.correct_answers}</p>
-      <p>Total Questions: {result.total_questions}</p>
-      <p>Experience Gained: {result.experience_gained}</p>
-      <p>Current Experience: {result.current_experience}</p>
-      <p>Current Level: {result.current_level}</p>
+    <div className="result-container">
+      <h2 className="result-title">Результаты теста</h2>
+      <div className="result-stats">
+        <div className="stat-item">
+          <span className="stat-label">Правильные ответы:</span>
+          <span className="stat-value">{result.correct_answers} из {result.total_questions}</span>
+        </div>
+        <div className="stat-item">
+          <span className="stat-label">Полученный опыт:</span>
+          <span className="stat-value">+{result.experience_gained} XP</span>
+        </div>
+        <div className="stat-item">
+          <span className="stat-label">Текущий опыт:</span>
+          <span className="stat-value">{result.current_experience} XP</span>
+        </div>
+        <div className="stat-item">
+          <span className="stat-label">Текущий уровень:</span>
+          <span className="stat-value">{result.current_level}</span>
+        </div>
+      </div>
       {result.new_achievements && result.new_achievements.length > 0 && (
-        <div>
-          <h4>New Achievements:</h4>
-          <ul>
+        <div className="achievements">
+          <h3>Новые достижения:</h3>
+          <ul className="achievement-list">
             {result.new_achievements.map((achievement, index) => (
-              <li key={index} className="achievement">{achievement}</li>
+              <li key={index} className="achievement-item">{achievement}</li>
             ))}
           </ul>
         </div>
       )}
-      <button onClick={onFinish}>Back to Test List</button>
+      <button className="finish-button" onClick={onFinish}>Вернуться к списку тестов</button>
     </div>
   );
 }
