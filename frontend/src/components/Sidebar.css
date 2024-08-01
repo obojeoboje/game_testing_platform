@@ -1,0 +1,97 @@
+.sidebar {
+	width: 250px;
+	height: 100%;
+	background-color: #1a1a1a;
+	color: white;
+	display: flex;
+	flex-direction: column;
+	border-top-right-radius: 20px;
+	border-bottom-right-radius: 20px;
+	overflow: hidden;
+}
+
+.sidebar-content {
+	flex-grow: 1;
+	overflow-y: auto;
+	padding: 20px;
+	display: flex;
+	flex-direction: column;
+}
+
+.logo {
+	margin-bottom: 30px;
+}
+
+.logo h2 {
+	font-size: 24px;
+	margin: 0;
+	color: white;
+	/* Изменено на белый цвет */
+}
+
+.sidebar nav {
+	flex-grow: 1;
+}
+
+.sidebar nav ul {
+	list-style-type: none;
+	padding: 0;
+}
+
+.sidebar nav li {
+	padding: 10px 15px;
+	margin-bottom: 10px;
+	border-radius: 8px;
+	cursor: pointer;
+	transition: background-color 0.3s;
+}
+
+.sidebar nav li:hover,
+.sidebar nav li.active {
+	background-color: #333;
+}
+
+.sidebar nav li.active {
+	background-color: #333;
+	/* Добавлено для активного элемента */
+}
+
+.icon {
+	margin-right: 10px;
+}
+
+.sidebar-footer {
+	padding: 20px;
+	border-top: 1px solid #333;
+}
+
+.support-btn,
+.settings-btn {
+	width: 100%;
+	padding: 10px;
+	margin-top: 10px;
+	background-color: transparent;
+	border: none;
+	color: white;
+	cursor: pointer;
+	text-align: left;
+	transition: background-color 0.3s;
+	display: flex;
+	align-items: center;
+}
+
+.support-btn:hover,
+.settings-btn:hover {
+	background-color: #333;
+}
+
+/* Добавим стили для иконок в футере */
+.sidebar-footer .icon {
+	color: #ff4757;
+	/* Красный цвет для иконки поддержки */
+}
+
+.settings-btn .icon {
+	color: #7bed9f;
+	/* Зеленый цвет для иконки настроек */
+}
