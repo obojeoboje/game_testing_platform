@@ -6,6 +6,7 @@ from flask_cors import CORS
 from datetime import timedelta, datetime
 import random
 from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy import func
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
@@ -383,6 +384,45 @@ def create_sample_data():
         ]
         db.session.add_all(options1)
         db.session.commit()
+
+@app.route('/admin/statistics', methods=['GET'])
+@jwt_required()
+def get_statistics():
+    current_user_id = get_jwt_identity()
+    if not is_admin(current_user_id):
+        return jsonify({"msg": "Admin access required"}), 403
+
+    # Общее количество пользователей
+    total_users = User.query.count()
+
+    # Активные пользователи (те, кто прошел тест за последние 30 дней)
+    thirty_days_ago = datetime.utcnow() - timedelta(days=30)
+    active_users = db.session.query(func.count(func.distinct(TestResult.user_id))).filter(TestResult.date_completed >= thirty_days_ago).scalar()
+
+    # Общее количество тестов
+    total_tests = Test.query.count()
+
+    # Количество пройденных тестов
+    completed_tests = TestResult.query.count()
+
+    # Средний балл
+    average_score = db.session.query(func.avg(TestResult.score * 100.0 / TestResult.total_questions)).scalar()
+
+    # Самый популярный тест (тест с наибольшим количеством прохождений)
+    top_test = db.session.query(Test.title, func.count(TestResult.id).label('count')).\
+        join(TestResult, Test.id == TestResult.test_id).\
+        group_by(Test.id).\
+        order_by(func.count(TestResult.id).desc()).\
+        first()
+
+    return jsonify({
+        "totalUsers": total_users,
+        "activeUsers": active_users,
+        "totalTests": total_tests,
+        "completedTests": completed_tests,
+        "averageScore": float(average_score) if average_score else 0,
+        "topTest": top_test.title if top_test else None
+    }), 200
 
 def update_all_passwords():
     users = User.query.all()
