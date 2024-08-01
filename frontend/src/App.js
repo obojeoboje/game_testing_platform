@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import Auth from './components/Auth';
 import TestList from './pages/TestList';
-import Profile from './pages/Profile';
-import TestHistory from './pages/TestHistory';
+import Profile from './pages/Profile/Profile';
+import TestHistory from './pages/TestHistory/TestHistory';
 import AdminPanel from './pages/AdminPanel';
 
 function App() {
