@@ -73,6 +73,7 @@ class Material(db.Model):
     title = db.Column(db.String(200), nullable=False)
     content = db.Column(db.Text, nullable=False)
     topic = db.Column(db.String(100), nullable=False)
+    cover_image = db.Column(db.String(200))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -446,26 +447,25 @@ def get_materials():
     search = request.args.get('search', '')
     topic = request.args.get('topic', '')
 
-    normalized_search = normalize_string(search)
+    query = Material.query
+    if search:
+        query = query.filter(
+            (Material.title.ilike(f'%{search}%')) |
+            (Material.content.ilike(f'%{search}%'))
+        )
+    if topic:
+        query = query.filter(Material.topic.ilike(f'%{topic}%'))
 
-    materials = Material.query.all()
-
-    filtered_materials = []
-    for m in materials:
-        if (not search or
-                normalized_search in normalize_string(m.title) or
-                normalized_search in normalize_string(m.content)):
-            if not topic or topic.lower() == m.topic.lower():
-                filtered_materials.append(m)
-
+    materials = query.all()
     return jsonify([{
         'id': m.id,
         'title': m.title,
         'content': markdown(m.content),
         'topic': m.topic,
+        'cover_image': m.cover_image,  # Добавьте это
         'created_at': m.created_at.isoformat(),
         'updated_at': m.updated_at.isoformat()
-    } for m in filtered_materials])
+    } for m in materials])
 
 
 @app.route('/materials', methods=['POST'])
@@ -476,7 +476,12 @@ def create_material():
         return jsonify({"msg": "Admin access required"}), 403
 
     data = request.json
-    new_material = Material(title=data['title'], content=data['content'], topic=data['topic'])
+    new_material = Material(
+        title=data['title'],
+        content=data['content'],
+        topic=data['topic'],
+        cover_image=data.get('cover_image', '')  # Добавьте это
+    )
     db.session.add(new_material)
     db.session.commit()
     return jsonify({"msg": "Material created successfully", "id": new_material.id}), 201
@@ -491,6 +496,7 @@ def get_material(material_id):
         'title': material.title,
         'content': markdown(material.content),
         'topic': material.topic,
+        'cover_image': material.cover_image,  # Добавьте это
         'created_at': material.created_at.isoformat(),
         'updated_at': material.updated_at.isoformat()
     })
@@ -508,6 +514,7 @@ def update_material(material_id):
     material.title = data.get('title', material.title)
     material.content = data.get('content', material.content)
     material.topic = data.get('topic', material.topic)
+    material.cover_image = data.get('cover_image', material.cover_image)  # Добавьте это
     db.session.commit()
     return jsonify({"msg": "Material updated successfully"})
 

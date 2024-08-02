@@ -88,9 +88,12 @@ function MaterialsList({ token }) {
       <div className="materials-grid">
         {materials.map(material => (
           <div key={material.id} className="material-card">
+            {material.cover_image && (
+              <img src={material.cover_image} alt={material.title} className="material-cover" />
+            )}
             <h3>{material.title}</h3>
             <p className="material-topic">Тема: {material.topic}</p>
-            <div className="material-preview" dangerouslySetInnerHTML={{ __html: material.content.substring(0, 150) + '...' }} />
+            <div className="material-preview" dangerouslySetInnerHTML={{ __html: material.content.substring(0, 100) + '...' }} />
             <button className="read-more" onClick={() => handleReadMore(material)}>Читать далее</button>
           </div>
         ))}
@@ -98,6 +101,9 @@ function MaterialsList({ token }) {
       {selectedMaterial && (
         <div className="modal" onClick={closeModal}>
           <div className="modal-content" ref={modalRef}>
+            {selectedMaterial.cover_image && (
+              <img src={selectedMaterial.cover_image} alt={selectedMaterial.title} className="material-cover-large" />
+            )}
             <h2>{selectedMaterial.title}</h2>
             <p className="material-topic">Тема: {selectedMaterial.topic}</p>
             <div dangerouslySetInnerHTML={{ __html: selectedMaterial.content }} />

@@ -34,14 +34,8 @@ function App() {
           />
           <div className="content">
             <h1>Геймифицированное обучение тестированию</h1>
-            {user && (
-              <div className="user-info">
-                <p>Уровень: {user.level}</p>
-                <p>Опыт: {user.experience}</p>
-              </div>
-            )}
             {currentView === 'tests' && <TestList token={token} onTestComplete={handleTestComplete} />}
-            {currentView === 'profile' && user && <Profile token={token} />}
+            {currentView === 'profile' && user && <Profile token={token} user={user} />}
             {currentView === 'history' && user && <TestHistory token={token} />}
             {currentView === 'materials' && <MaterialsList token={token} />}
             {currentView === 'admin' && user && user.is_admin && <AdminPanel token={token} />}
