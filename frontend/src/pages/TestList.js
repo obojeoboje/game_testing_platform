@@ -27,18 +27,20 @@ function TestList({ token, onTestComplete }) {
     setSelectedTest(null);
   };
 
-  const getDifficultyTag = (difficulty) => {
-    switch(difficulty.toLowerCase()) {
-      case 'junior':
-        return <span className="tag junior">Junior</span>;
-      case 'middle':
-        return <span className="tag middle">Middle</span>;
-      case 'senior':
-        return <span className="tag senior">Senior</span>;
-      default:
-        return null;
-    }
-  };
+const getDifficultyTag = (difficulty) => {
+  if (!difficulty) return null; // Добавляем эту проверку
+
+  switch(difficulty.toLowerCase()) {
+    case 'junior':
+      return <span className="tag junior">Junior</span>;
+    case 'middle':
+      return <span className="tag middle">Middle</span>;
+    case 'senior':
+      return <span className="tag senior">Senior</span>;
+    default:
+      return null;
+  }
+};
 
   return (
     <div className="test-list-container">

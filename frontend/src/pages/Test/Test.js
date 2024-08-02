@@ -25,15 +25,41 @@ function Test({ testId, token, onTestComplete }) {
     fetchTest();
   }, [testId, token]);
 
-  const handleAnswer = (questionId, answerId) => {
-    setAnswers({ ...answers, [questionId]: answerId });
+  const handleAnswer = async (questionId, answerId, isCorrect) => {
+    const updatedAnswers = { ...answers, [questionId]: { id: answerId, correct: isCorrect } };
+    setAnswers(updatedAnswers);
+
+    try {
+      await axios.post(
+        `http://localhost:5000/tests/${testId}/check-answer`,
+        { question_id: questionId, option_id: answerId },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    } catch (error) {
+      console.error('Error checking answer:', error);
+    }
+
+    if (currentQuestionIndex < test.questions.length - 1) {
+      setTimeout(() => {
+        setCurrentQuestionIndex(currentQuestionIndex + 1);
+      }, 1000);
+    } else {
+      setTimeout(() => {
+        handleSubmit(updatedAnswers);
+      }, 1000);
+    }
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (finalAnswers) => {
     try {
       const response = await axios.post(
         `http://localhost:5000/tests/${testId}/submit`,
-        { answers: Object.entries(answers).map(([questionId, optionId]) => ({ question_id: parseInt(questionId), option_id: optionId })) },
+        { 
+          answers: Object.entries(finalAnswers).map(([questionId, answer]) => ({
+            question_id: parseInt(questionId),
+            option_id: answer.id
+          }))
+        },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setResult(response.data);
@@ -42,17 +68,21 @@ function Test({ testId, token, onTestComplete }) {
     }
   };
 
+  const handleNavigateToQuestion = (index) => {
+    setCurrentQuestionIndex(index);
+  };
+
   if (!test) return <div className="loading">Loading test...</div>;
   if (result) return <Result result={result} onFinish={onTestComplete} />;
 
   const currentQuestion = test.questions[currentQuestionIndex];
 
-return (
+  return (
     <div className="test-container">
       <div className="test-header">
         <h2>{test.title}</h2>
         <div className="test-progress">
-          <span>Тест {currentQuestionIndex + 1} из {test.questions.length}</span>
+          <span>Вопрос {currentQuestionIndex + 1} из {test.questions.length}</span>
           <div className="progress-bar">
             <div className="progress" style={{ width: `${((currentQuestionIndex + 1) / test.questions.length) * 100}%` }}></div>
           </div>
@@ -60,18 +90,36 @@ return (
       </div>
       <Question
         question={currentQuestion}
-        onAnswer={(answerId) => handleAnswer(currentQuestion.id, answerId)}
+        onAnswer={(answerId, isCorrect) => handleAnswer(currentQuestion.id, answerId, isCorrect)}
         userAnswer={answers[currentQuestion.id]}
       />
       <div className="test-navigation">
         {currentQuestionIndex > 0 && (
           <button onClick={() => setCurrentQuestionIndex(currentQuestionIndex - 1)}>Предыдущий</button>
         )}
-        {currentQuestionIndex < test.questions.length - 1 ? (
+        <div className="spacer"></div>
+        {currentQuestionIndex < test.questions.length - 1 && (
           <button onClick={() => setCurrentQuestionIndex(currentQuestionIndex + 1)}>Следующий</button>
-        ) : (
-          <button onClick={handleSubmit}>Завершить</button>
         )}
+        {currentQuestionIndex === test.questions.length - 1 && !answers[currentQuestion.id] && (
+          <button onClick={() => handleSubmit(answers)}>Завершить</button>
+        )}
+      </div>
+      <div className="question-navigation">
+        {test.questions.map((question, index) => (
+          <button
+            key={index}
+            onClick={() => handleNavigateToQuestion(index)}
+            className={`question-nav-button 
+              ${index === currentQuestionIndex ? 'active' : ''} 
+              ${answers[question.id] ? 
+                (answers[question.id].correct ? 'correct' : 'incorrect') 
+                : ''
+              }`}
+          >
+            {index + 1}
+          </button>
+        ))}
       </div>
     </div>
   );

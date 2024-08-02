@@ -253,7 +253,8 @@ def submit_test(test_id):
             if option and option.question_id == question.id and option.is_correct:
                 correct_answers += 1
 
-    experience_gained = correct_answers * 50
+    all_correct = correct_answers == total_questions
+    experience_gained = 50 if all_correct else 0
     user.experience += experience_gained
     user.tests_completed += 1
     user.correct_answers += correct_answers
@@ -263,7 +264,6 @@ def submit_test(test_id):
         user.level += 1
         user.experience -= 500
 
-    # Сохраняем результат теста
     test_result = TestResult(
         user_id=user.id,
         test_id=test_id,
@@ -285,6 +285,41 @@ def submit_test(test_id):
         'new_achievements': new_achievements
     }), 200
 
+
+@app.route('/tests/<int:test_id>/check-answer', methods=['POST'])
+@jwt_required()
+def check_answer(test_id):
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "No JSON data provided"}), 400
+
+    question_id = data.get('question_id')
+    option_id = data.get('option_id')
+
+    app.logger.info(f"Received request to check answer: test_id={test_id}, question_id={question_id}, option_id={option_id}")
+
+    if not question_id or not option_id:
+        return jsonify({"error": "Missing question_id or option_id"}), 400
+
+    question = Question.query.get(question_id)
+    if not question:
+        return jsonify({"error": f"Question with id {question_id} not found"}), 404
+    if question.test_id != test_id:
+        return jsonify({"error": f"Question {question_id} does not belong to test {test_id}"}), 400
+
+    option = Option.query.get(option_id)
+    if not option:
+        return jsonify({"error": f"Option with id {option_id} not found"}), 404
+    if option.question_id != question_id:
+        return jsonify({"error": f"Option {option_id} does not belong to question {question_id}"}), 400
+
+    is_correct = option.is_correct
+    app.logger.info(f"Answer check result: is_correct={is_correct}")
+
+    return jsonify({
+        "correct": is_correct,
+        "explanation": "Объяснение правильного ответа" if not is_correct else None
+    })
 
 def check_and_update_achievements(user):
     new_achievements = []

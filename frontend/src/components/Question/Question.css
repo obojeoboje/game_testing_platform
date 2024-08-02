@@ -1,5 +1,14 @@
 .question {
 	margin-bottom: 20px;
+	padding: 20px;
+	background-color: var(--card-background);
+	border-radius: 8px;
+	box-shadow: var(--shadow);
+}
+
+.question h3 {
+	color: var(--primary-color);
+	margin-bottom: 15px;
 }
 
 .options {
@@ -15,12 +24,51 @@
 	border: 1px solid #e0e0e0;
 	border-radius: 5px;
 	cursor: pointer;
+	transition: background-color 0.3s;
+}
+
+.option:hover {
+	background-color: #f5f5f5;
 }
 
 .option.selected {
-	background-color: #f0f0f0;
+	background-color: var(--secondary-color);
 }
 
 .option input {
 	margin-right: 10px;
+}
+
+.feedback {
+	margin-top: 15px;
+	padding: 10px;
+	border-radius: 5px;
+	font-weight: bold;
+}
+
+.option.correct {
+	background-color: rgba(76, 175, 80, 0.1);
+	border-color: #4caf50;
+}
+
+.option.incorrect {
+	background-color: rgba(244, 67, 54, 0.1);
+	border-color: #f44336;
+}
+
+.feedback {
+	margin-top: 10px;
+	padding: 10px;
+	border-radius: 5px;
+	font-weight: bold;
+}
+
+.feedback.correct {
+	background-color: rgba(76, 175, 80, 0.1);
+	color: #4caf50;
+}
+
+.feedback.incorrect {
+	background-color: rgba(244, 67, 54, 0.1);
+	color: #f44336;
 }
