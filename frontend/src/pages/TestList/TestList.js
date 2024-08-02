@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import Test from '../pages/Test/Test';
+import Test from '../Test/Test';
 import './TestList.css';
 
 function TestList({ token, onTestComplete }) {

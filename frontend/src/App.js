@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import Auth from './components/Auth';
-import TestList from './pages/TestList';
+import Auth from './components/Auth/Auth';
+import TestList from './pages/TestList/TestList';
 import Profile from './pages/Profile/Profile';
 import TestHistory from './pages/TestHistory/TestHistory';
 import AdminPanel from './pages/AdminPanel/AdminPanel';
