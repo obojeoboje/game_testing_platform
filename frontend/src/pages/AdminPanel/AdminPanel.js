@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import TestManagement from '../components/TestManagement';
-import UserManagement from '../components/UserManagement';
-import Statistics from '../components/Statistics/Statistics';
-import MaterialForm from '../components/MaterialForm';
+import TestManagement from '../../components/TestManagement';
+import UserManagement from '../../components/UserManagement';
+import Statistics from '../../components/Statistics/Statistics';
+import MaterialForm from '../../components/MaterialForm/MaterialForm';
 import axios from 'axios';
 import './AdminPanel.css';
 

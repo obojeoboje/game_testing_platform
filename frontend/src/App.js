@@ -3,8 +3,8 @@ import Auth from './components/Auth';
 import TestList from './pages/TestList';
 import Profile from './pages/Profile/Profile';
 import TestHistory from './pages/TestHistory/TestHistory';
-import AdminPanel from './pages/AdminPanel';
-import MaterialsList from './pages/MaterialsList';
+import AdminPanel from './pages/AdminPanel/AdminPanel';
+import MaterialsList from './pages/MaterialsList/MaterialsList';
 import Sidebar from './components/Sidebar/Sidebar';
 import './App.css';
 

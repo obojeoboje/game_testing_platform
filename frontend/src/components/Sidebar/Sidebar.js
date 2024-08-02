@@ -6,7 +6,7 @@ function Sidebar({ currentView, setCurrentView, isAdmin }) {
     <div className="sidebar">
       <div className="sidebar-content">
         <div className="logo">
-          <h2>Skillzone</h2>
+          <h2>Polynskih</h2>
         </div>
         <nav>
           <ul>
