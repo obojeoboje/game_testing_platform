@@ -43,6 +43,10 @@
 	border-radius: 8px;
 	cursor: pointer;
 	transition: background-color 0.3s;
+	display: flex;
+	/* Добавлено для выравнивания */
+	align-items: center;
+	/* Добавлено для выравнивания */
 }
 
 .sidebar nav li:hover,
@@ -51,6 +55,10 @@
 }
 
 .icon {
+	display: flex;
+	/* Добавлено для выравнивания */
+	align-items: center;
+	/* Добавлено для выравнивания */
 	margin-right: 10px;
 }
 
@@ -71,7 +79,9 @@
 	text-align: left;
 	transition: background-color 0.3s;
 	display: flex;
+	/* Добавлено для выравнивания */
 	align-items: center;
+	/* Добавлено для выравнивания */
 }
 
 .support-btn:hover,
