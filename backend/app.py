@@ -6,8 +6,9 @@ from flask_cors import CORS
 from datetime import timedelta, datetime
 import random
 from werkzeug.security import generate_password_hash, check_password_hash
-from sqlalchemy import func
+from sqlalchemy import func, or_
 from markdown import markdown
+import re
 
 
 app = Flask(__name__)
@@ -435,19 +436,28 @@ def get_statistics():
     }), 200
 
 
+def normalize_string(s):
+    return re.sub(r'\W+', '', s.lower())
+
+
 @app.route('/materials', methods=['GET'])
 @jwt_required()
 def get_materials():
     search = request.args.get('search', '')
     topic = request.args.get('topic', '')
 
-    query = Material.query
-    if search:
-        query = query.filter(Material.title.ilike(f'%{search}%') | Material.content.ilike(f'%{search}%'))
-    if topic:
-        query = query.filter_by(topic=topic)
+    normalized_search = normalize_string(search)
 
-    materials = query.all()
+    materials = Material.query.all()
+
+    filtered_materials = []
+    for m in materials:
+        if (not search or
+                normalized_search in normalize_string(m.title) or
+                normalized_search in normalize_string(m.content)):
+            if not topic or topic.lower() == m.topic.lower():
+                filtered_materials.append(m)
+
     return jsonify([{
         'id': m.id,
         'title': m.title,
@@ -455,7 +465,7 @@ def get_materials():
         'topic': m.topic,
         'created_at': m.created_at.isoformat(),
         'updated_at': m.updated_at.isoformat()
-    } for m in materials])
+    } for m in filtered_materials])
 
 
 @app.route('/materials', methods=['POST'])

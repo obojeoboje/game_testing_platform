@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import './MaterialsList.css';
 
@@ -8,6 +8,7 @@ function MaterialsList({ token }) {
   const [search, setSearch] = useState('');
   const [selectedTopic, setSelectedTopic] = useState('');
   const [selectedMaterial, setSelectedMaterial] = useState(null);
+  const modalRef = useRef(null);
 
   useEffect(() => {
     fetchMaterials();
@@ -53,9 +54,18 @@ function MaterialsList({ token }) {
     setSelectedMaterial(material);
   };
 
-  const closeModal = () => {
-    setSelectedMaterial(null);
+  const closeModal = (e) => {
+    if (modalRef.current && !modalRef.current.contains(e.target)) {
+      setSelectedMaterial(null);
+    }
   };
+
+  useEffect(() => {
+    document.addEventListener('mousedown', closeModal);
+    return () => {
+      document.removeEventListener('mousedown', closeModal);
+    };
+  }, []);
 
   return (
     <div className="materials-list">
@@ -86,12 +96,12 @@ function MaterialsList({ token }) {
         ))}
       </div>
       {selectedMaterial && (
-        <div className="modal">
-          <div className="modal-content">
+        <div className="modal" onClick={closeModal}>
+          <div className="modal-content" ref={modalRef}>
             <h2>{selectedMaterial.title}</h2>
             <p className="material-topic">Тема: {selectedMaterial.topic}</p>
             <div dangerouslySetInnerHTML={{ __html: selectedMaterial.content }} />
-            <button onClick={closeModal}>Закрыть</button>
+            <button onClick={() => setSelectedMaterial(null)}>Закрыть</button>
           </div>
         </div>
       )}
