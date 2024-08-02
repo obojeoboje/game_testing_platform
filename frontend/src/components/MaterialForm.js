@@ -1,30 +1,26 @@
-import React, { useState } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from 'react';
 import './MaterialForm.css';
 
-function MaterialForm({ token, material = null, onSave }) {
-  const [title, setTitle] = useState(material ? material.title : '');
-  const [content, setContent] = useState(material ? material.content : '');
-  const [topic, setTopic] = useState(material ? material.topic : '');
+function MaterialForm({ token, material, onSave, onCancel }) {
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
+  const [topic, setTopic] = useState('');
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      if (material) {
-        await axios.put(`http://localhost:5000/materials/${material.id}`, 
-          { title, content, topic },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-      } else {
-        await axios.post('http://localhost:5000/materials', 
-          { title, content, topic },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-      }
-      onSave();
-    } catch (error) {
-      console.error('Error saving material:', error);
+  useEffect(() => {
+    if (material) {
+      setTitle(material.title);
+      setContent(material.content);
+      setTopic(material.topic);
+    } else {
+      setTitle('');
+      setContent('');
+      setTopic('');
     }
+  }, [material]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSave({ title, content, topic });
   };
 
   return (
@@ -49,7 +45,10 @@ function MaterialForm({ token, material = null, onSave }) {
         onChange={(e) => setContent(e.target.value)}
         required
       />
-      <button type="submit">{material ? 'Обновить' : 'Создать'} материал</button>
+      <div className="form-actions">
+        <button type="submit">{material ? 'Обновить' : 'Создать'} материал</button>
+        {material && <button type="button" onClick={onCancel}>Отмена</button>}
+      </div>
     </form>
   );
 }

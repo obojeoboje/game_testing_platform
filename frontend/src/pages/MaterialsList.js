@@ -7,6 +7,7 @@ function MaterialsList({ token }) {
   const [topics, setTopics] = useState([]);
   const [search, setSearch] = useState('');
   const [selectedTopic, setSelectedTopic] = useState('');
+  const [selectedMaterial, setSelectedMaterial] = useState(null);
 
   useEffect(() => {
     fetchMaterials();
@@ -48,10 +49,18 @@ function MaterialsList({ token }) {
     fetchMaterials();
   };
 
+  const handleReadMore = (material) => {
+    setSelectedMaterial(material);
+  };
+
+  const closeModal = () => {
+    setSelectedMaterial(null);
+  };
+
   return (
     <div className="materials-list">
       <h2>Учебные материалы</h2>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="materials-search">
         <input
           type="text"
           placeholder="Поиск материалов..."
@@ -66,15 +75,26 @@ function MaterialsList({ token }) {
         </select>
         <button type="submit">Поиск</button>
       </form>
-      <div className="materials">
+      <div className="materials-grid">
         {materials.map(material => (
           <div key={material.id} className="material-card">
             <h3>{material.title}</h3>
-            <p>Тема: {material.topic}</p>
-            <div dangerouslySetInnerHTML={{ __html: material.content }} />
+            <p className="material-topic">Тема: {material.topic}</p>
+            <div className="material-preview" dangerouslySetInnerHTML={{ __html: material.content.substring(0, 150) + '...' }} />
+            <button className="read-more" onClick={() => handleReadMore(material)}>Читать далее</button>
           </div>
         ))}
       </div>
+      {selectedMaterial && (
+        <div className="modal">
+          <div className="modal-content">
+            <h2>{selectedMaterial.title}</h2>
+            <p className="material-topic">Тема: {selectedMaterial.topic}</p>
+            <div dangerouslySetInnerHTML={{ __html: selectedMaterial.content }} />
+            <button onClick={closeModal}>Закрыть</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

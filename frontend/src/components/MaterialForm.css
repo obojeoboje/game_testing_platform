@@ -2,7 +2,7 @@
 	display: flex;
 	flex-direction: column;
 	max-width: 600px;
-	margin: 0 auto;
+	margin: 0 auto 20px;
 }
 
 .material-form input,
@@ -15,10 +15,19 @@
 	min-height: 200px;
 }
 
-.material-form button {
+.form-actions {
+	display: flex;
+	justify-content: space-between;
+}
+
+.form-actions button {
 	padding: 10px;
 	background-color: #6c5ce7;
 	color: white;
 	border: none;
 	cursor: pointer;
+}
+
+.form-actions button:hover {
+	background-color: #5b4bc7;
 }

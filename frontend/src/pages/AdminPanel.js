@@ -4,6 +4,7 @@ import UserManagement from '../components/UserManagement';
 import Statistics from '../components/Statistics/Statistics';
 import MaterialForm from '../components/MaterialForm';
 import axios from 'axios';
+import './AdminPanel.css';
 
 function AdminPanel({ token }) {
   const [activeSection, setActiveSection] = useState('tests');
@@ -40,6 +41,28 @@ function AdminPanel({ token }) {
     }
   };
 
+  const handleEditMaterial = (material) => {
+    setEditingMaterial(material);
+  };
+
+  const handleSaveMaterial = async (updatedMaterial) => {
+    try {
+      if (editingMaterial) {
+        await axios.put(`http://localhost:5000/materials/${editingMaterial.id}`, updatedMaterial, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      } else {
+        await axios.post('http://localhost:5000/materials', updatedMaterial, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      }
+      setEditingMaterial(null);
+      fetchMaterials();
+    } catch (error) {
+      console.error('Error saving material:', error);
+    }
+  };
+
   const renderContent = () => {
     switch(activeSection) {
       case 'tests':
@@ -50,19 +73,24 @@ function AdminPanel({ token }) {
         return <Statistics token={token} />;
       case 'materials':
         return (
-          <div>
+          <div className="admin-materials">
             <h3>Управление материалами</h3>
-            <MaterialForm token={token} material={editingMaterial} onSave={() => {
-              setEditingMaterial(null);
-              fetchMaterials();
-            }} />
-            <div className="materials-list">
+            <MaterialForm 
+              token={token} 
+              material={editingMaterial} 
+              onSave={handleSaveMaterial}
+              onCancel={() => setEditingMaterial(null)}
+            />
+            <div className="admin-materials-grid">
               {materials.map(material => (
-                <div key={material.id} className="material-item">
+                <div key={material.id} className="admin-material-card">
                   <h4>{material.title}</h4>
-                  <p>Тема: {material.topic}</p>
-                  <button onClick={() => setEditingMaterial(material)}>Редактировать</button>
-                  <button onClick={() => handleDeleteMaterial(material.id)}>Удалить</button>
+                  <p className="admin-material-topic">Тема: {material.topic}</p>
+                  <div className="admin-material-preview" dangerouslySetInnerHTML={{ __html: material.content.substring(0, 100) + '...' }} />
+                  <div className="admin-material-actions">
+                    <button onClick={() => handleEditMaterial(material)}>Редактировать</button>
+                    <button onClick={() => handleDeleteMaterial(material.id)}>Удалить</button>
+                  </div>
                 </div>
               ))}
             </div>
