@@ -4,7 +4,7 @@ import UserManagement from '../../components/UserManagement';
 import Statistics from '../../components/Statistics/Statistics';
 import MaterialForm from '../../components/MaterialForm/MaterialForm';
 import axios from 'axios';
-import './AdminPanel.css';
+import '../../styles/pages/AdminPanel.css';
 
 function AdminPanel({ token }) {
   const [activeSection, setActiveSection] = useState('tests');

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
-import './MaterialsList.css';
+import '../../styles/pages/MaterialsList.css';
 
 function MaterialsList({ token }) {
   const [materials, setMaterials] = useState([]);

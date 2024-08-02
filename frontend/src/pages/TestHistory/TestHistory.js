@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { FaCheckCircle, FaTimesCircle, FaRegClock } from 'react-icons/fa';
-import './TestHistory.css';
+import '../../styles/pages/TestHistory.css';
 
 function TestHistory({ token }) {
   const [history, setHistory] = useState([]);

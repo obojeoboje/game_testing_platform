@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { FaStar, FaTrophy, FaCheckCircle } from 'react-icons/fa';
-import './Profile.css';
+import '../../styles/pages/Profile.css';
 
 function Profile({ token }) {
   const [profile, setProfile] = useState(null);

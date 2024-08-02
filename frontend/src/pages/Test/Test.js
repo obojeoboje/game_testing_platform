@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Question from '../../components/Question/Question';
 import Result from '../../components/Result/Result';
-import './Test.css';
+import '../../styles/pages/Test.css';
 
 function Test({ testId, token, onTestComplete }) {
   const [test, setTest] = useState(null);

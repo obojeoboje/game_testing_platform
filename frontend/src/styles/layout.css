@@ -1,0 +1,28 @@
+.container {
+	max-width: 1200px;
+	margin: 0 auto;
+	padding: 20px;
+}
+
+.app {
+	display: flex;
+	height: 100vh;
+	background-color: var(--background-color);
+	padding: 20px;
+	box-sizing: border-box;
+}
+
+.main-container {
+	display: flex;
+	width: 100%;
+	background-color: var(--card-background);
+	border-radius: 20px;
+	overflow: hidden;
+	box-shadow: var(--shadow);
+}
+
+.content {
+	flex-grow: 1;
+	padding: 20px;
+	overflow-y: auto;
+}
