@@ -1,7 +1,11 @@
 .profile {
 	padding: 30px;
-	background-color: #f8f9fa;
+	background-color: var(--background-color);
+	/* Используем общий цвет фона */
 	border-radius: 10px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
 }
 
 .profile h2 {
@@ -13,10 +17,16 @@
 }
 
 .profile-card {
-	background-color: #ffffff;
-	border-radius: 8px;
+	background-color: var(--background-color);
+	/* Белый фон */
+	border-radius: 10px;
+	/* Более округленные углы */
 	padding: 25px;
-	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+	box-shadow: var(--card-shadow);
+	/* Тень для карточки */
+	width: 100%;
+	max-width: 600px;
+	/* Максимальная ширина для карточки */
 }
 
 .profile-header {
@@ -49,6 +59,8 @@
 	border-radius: 5px;
 	margin-bottom: 20px;
 	position: relative;
+	overflow: hidden;
+	/* Чтобы прогресс был обрезан по границам */
 }
 
 .experience-progress {
@@ -87,11 +99,15 @@
 .achievements h4 {
 	margin-bottom: 10px;
 	color: #333;
+	font-size: 1.2em;
+	/* Увеличенный размер шрифта */
 }
 
 .achievements ul {
 	list-style-type: none;
 	padding: 0;
+	margin: 0;
+	/* Убираем отступы */
 }
 
 .achievements li {

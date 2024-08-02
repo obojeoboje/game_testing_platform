@@ -50,15 +50,15 @@
 .tag {
 	display: inline-block;
 	padding: 4px 8px;
-	border-radius: 4px;
+	border-radius: 8px;
 	font-size: 12px;
 	font-weight: bold;
 	margin-bottom: 8px;
 }
 
 .junior {
-	background-color: #a8e6cf;
-	color: #1b4332;
+	background-color: #d0f0de;
+	color: #298f65;
 }
 
 .middle {
