@@ -5,8 +5,8 @@
 	color: white;
 	display: flex;
 	flex-direction: column;
-	border-top-right-radius: 20px;
-	border-bottom-right-radius: 20px;
+	border-top-left-radius: 20px;
+	border-bottom-left-radius: 20px;
 	overflow: hidden;
 }
 
@@ -26,7 +26,6 @@
 	font-size: 24px;
 	margin: 0;
 	color: white;
-	/* Изменено на белый цвет */
 }
 
 .sidebar nav {
@@ -49,11 +48,6 @@
 .sidebar nav li:hover,
 .sidebar nav li.active {
 	background-color: #333;
-}
-
-.sidebar nav li.active {
-	background-color: #333;
-	/* Добавлено для активного элемента */
 }
 
 .icon {
@@ -85,13 +79,10 @@
 	background-color: #333;
 }
 
-/* Добавим стили для иконок в футере */
 .sidebar-footer .icon {
 	color: #ff4757;
-	/* Красный цвет для иконки поддержки */
 }
 
 .settings-btn .icon {
 	color: #7bed9f;
-	/* Зеленый цвет для иконки настроек */
 }

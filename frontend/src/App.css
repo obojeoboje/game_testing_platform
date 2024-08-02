@@ -1,20 +1,18 @@
 .app {
   display: flex;
   height: 100vh;
-  background-color: #f0f2f5;
+  background-color: var(--background-color);
   padding: 20px;
   box-sizing: border-box;
-  /* Добавлено */
 }
 
 .main-container {
   display: flex;
   width: 100%;
-  background-color: white;
+  background-color: var(--card-background);
   border-radius: 20px;
   overflow: hidden;
-  max-height: calc(100vh - 40px);
-  /* Добавлено */
+  box-shadow: var(--shadow);
 }
 
 .content {

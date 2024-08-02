@@ -3,13 +3,13 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from flask_cors import CORS
+from flask_migrate import Migrate
 from datetime import timedelta, datetime
 import random
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import func, or_
 from markdown import markdown
 import re
-
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
@@ -19,6 +19,7 @@ db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
 CORS(app)
+migrate = Migrate(app, db)
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -41,6 +42,8 @@ class User(db.Model):
 class Test(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
+    image_url = db.Column(db.String(200))
+    difficulty = db.Column(db.String(20))
     questions = db.relationship('Question', backref='test', lazy=True)
 
 
@@ -103,11 +106,17 @@ def protected():
     user = User.query.get(current_user_id)
     return jsonify(logged_in_as=user.username), 200
 
+
 @app.route('/tests', methods=['GET'])
 @jwt_required()
 def get_tests():
     tests = Test.query.all()
-    return jsonify([{'id': test.id, 'title': test.title} for test in tests]), 200
+    return jsonify([{
+        'id': test.id,
+        'title': test.title,
+        'image_url': test.image_url,
+        'difficulty': test.difficulty
+    } for test in tests]), 200
 
 
 @app.route('/tests', methods=['POST'])
@@ -118,7 +127,11 @@ def create_test():
         return jsonify({"msg": "Admin access required"}), 403
 
     data = request.json
-    new_test = Test(title=data['title'])
+    new_test = Test(
+        title=data['title'],
+        image_url=data.get('image_url'),
+        difficulty=data.get('difficulty')
+    )
     db.session.add(new_test)
     db.session.commit()
 
@@ -153,6 +166,8 @@ def get_test(test_id):
     return jsonify({
         'id': test.id,
         'title': test.title,
+        'image_url': test.image_url,
+        'difficulty': test.difficulty,
         'questions': questions
     }), 200
 
@@ -168,6 +183,8 @@ def update_test(test_id):
     data = request.json
 
     test.title = data['title']
+    test.image_url = data.get('image_url', test.image_url)
+    test.difficulty = data.get('difficulty', test.difficulty)
 
     # Удаляем существующие вопросы и варианты ответов
     for question in test.questions:
@@ -378,9 +395,14 @@ def is_admin(user_id):
     user = User.query.get(user_id)
     return user.is_admin if user else False
 
+
 def create_sample_data():
     if not Test.query.first():
-        test = Test(title="Основы тестирования")
+        test = Test(
+            title="Основы тестирования",
+            image_url="https://opis-cdn.tinkoffjournal.ru/mercury/kak-koshka-manipuliruet-ludmi-1.gtqjybqvotxy..png",
+            difficulty="Junior"
+        )
         db.session.add(test)
         db.session.commit()
 
