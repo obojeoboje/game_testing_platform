@@ -4,7 +4,7 @@ import TestList from './pages/TestList';
 import Profile from './pages/Profile/Profile';
 import TestHistory from './pages/TestHistory/TestHistory';
 import AdminPanel from './pages/AdminPanel';
-import Sidebar from './components/Sidebar';
+import Sidebar from './components/Sidebar/Sidebar';
 import './App.css';
 
 function App() {

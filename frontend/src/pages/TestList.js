@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import Test from './Test';  // Добавьте этот импорт
+import Test from './Test/Test';  // Добавьте этот импорт
 
 function TestList({ token, onTestComplete }) {
   const [tests, setTests] = useState([]);

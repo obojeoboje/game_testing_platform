@@ -1,0 +1,62 @@
+.result-container {
+	max-width: 800px;
+	margin: 0 auto;
+	padding: 20px;
+}
+
+.result-title {
+	font-size: 24px;
+	color: #333;
+	margin-bottom: 20px;
+}
+
+.result-summary {
+	font-size: 18px;
+	margin-bottom: 20px;
+	background-color: #f0f0f0;
+	padding: 15px;
+	border-radius: 5px;
+}
+
+.new-achievements {
+	margin-bottom: 20px;
+	background-color: #e6f7ff;
+	padding: 15px;
+	border-radius: 5px;
+}
+
+.new-achievements h3 {
+	margin-top: 0;
+}
+
+.new-achievements ul {
+	padding-left: 20px;
+}
+
+.result-question {
+	margin-bottom: 20px;
+	padding: 15px;
+	border-radius: 5px;
+}
+
+.result-question.correct {
+	background-color: #d4edda;
+}
+
+.result-question.incorrect {
+	background-color: #f8d7da;
+}
+
+.next-test-btn {
+	padding: 10px 20px;
+	background-color: #6c5ce7;
+	color: white;
+	border: none;
+	border-radius: 5px;
+	cursor: pointer;
+	font-size: 16px;
+}
+
+.next-test-btn:hover {
+	background-color: #5b4bc7;
+}
