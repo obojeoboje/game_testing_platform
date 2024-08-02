@@ -4,6 +4,7 @@ import TestList from './pages/TestList';
 import Profile from './pages/Profile/Profile';
 import TestHistory from './pages/TestHistory/TestHistory';
 import AdminPanel from './pages/AdminPanel';
+import MaterialsList from './pages/MaterialsList';
 import Sidebar from './components/Sidebar/Sidebar';
 import './App.css';
 
@@ -42,6 +43,7 @@ function App() {
             {currentView === 'tests' && <TestList token={token} onTestComplete={handleTestComplete} />}
             {currentView === 'profile' && user && <Profile token={token} />}
             {currentView === 'history' && user && <TestHistory token={token} />}
+            {currentView === 'materials' && <MaterialsList token={token} />}
             {currentView === 'admin' && user && user.is_admin && <AdminPanel token={token} />}
           </div>
         </div>

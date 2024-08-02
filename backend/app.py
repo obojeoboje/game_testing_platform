@@ -7,6 +7,8 @@ from datetime import timedelta, datetime
 import random
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import func
+from markdown import markdown
+
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
@@ -64,6 +66,14 @@ class TestResult(db.Model):
 
     user = db.relationship('User', backref=db.backref('test_results', lazy=True))
     test = db.relationship('Test', backref=db.backref('results', lazy=True))
+
+class Material(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    topic = db.Column(db.String(100), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 @app.route('/register', methods=['POST'])
 def register():
@@ -423,6 +433,93 @@ def get_statistics():
         "averageScore": float(average_score) if average_score else 0,
         "topTest": top_test.title if top_test else None
     }), 200
+
+
+@app.route('/materials', methods=['GET'])
+@jwt_required()
+def get_materials():
+    search = request.args.get('search', '')
+    topic = request.args.get('topic', '')
+
+    query = Material.query
+    if search:
+        query = query.filter(Material.title.ilike(f'%{search}%') | Material.content.ilike(f'%{search}%'))
+    if topic:
+        query = query.filter_by(topic=topic)
+
+    materials = query.all()
+    return jsonify([{
+        'id': m.id,
+        'title': m.title,
+        'content': markdown(m.content),
+        'topic': m.topic,
+        'created_at': m.created_at.isoformat(),
+        'updated_at': m.updated_at.isoformat()
+    } for m in materials])
+
+
+@app.route('/materials', methods=['POST'])
+@jwt_required()
+def create_material():
+    current_user_id = get_jwt_identity()
+    if not is_admin(current_user_id):
+        return jsonify({"msg": "Admin access required"}), 403
+
+    data = request.json
+    new_material = Material(title=data['title'], content=data['content'], topic=data['topic'])
+    db.session.add(new_material)
+    db.session.commit()
+    return jsonify({"msg": "Material created successfully", "id": new_material.id}), 201
+
+
+@app.route('/materials/<int:material_id>', methods=['GET'])
+@jwt_required()
+def get_material(material_id):
+    material = Material.query.get_or_404(material_id)
+    return jsonify({
+        'id': material.id,
+        'title': material.title,
+        'content': markdown(material.content),
+        'topic': material.topic,
+        'created_at': material.created_at.isoformat(),
+        'updated_at': material.updated_at.isoformat()
+    })
+
+
+@app.route('/materials/<int:material_id>', methods=['PUT'])
+@jwt_required()
+def update_material(material_id):
+    current_user_id = get_jwt_identity()
+    if not is_admin(current_user_id):
+        return jsonify({"msg": "Admin access required"}), 403
+
+    material = Material.query.get_or_404(material_id)
+    data = request.json
+    material.title = data.get('title', material.title)
+    material.content = data.get('content', material.content)
+    material.topic = data.get('topic', material.topic)
+    db.session.commit()
+    return jsonify({"msg": "Material updated successfully"})
+
+
+@app.route('/materials/<int:material_id>', methods=['DELETE'])
+@jwt_required()
+def delete_material(material_id):
+    current_user_id = get_jwt_identity()
+    if not is_admin(current_user_id):
+        return jsonify({"msg": "Admin access required"}), 403
+
+    material = Material.query.get_or_404(material_id)
+    db.session.delete(material)
+    db.session.commit()
+    return jsonify({"msg": "Material deleted successfully"})
+
+
+@app.route('/materials/topics', methods=['GET'])
+@jwt_required()
+def get_topics():
+    topics = db.session.query(Material.topic.distinct()).all()
+    return jsonify([topic[0] for topic in topics])
 
 def update_all_passwords():
     users = User.query.all()

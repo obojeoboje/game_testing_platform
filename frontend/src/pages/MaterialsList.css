@@ -1,0 +1,36 @@
+.materials-list {
+	max-width: 800px;
+	margin: 0 auto;
+	padding: 20px;
+}
+
+.materials-list form {
+	display: flex;
+	margin-bottom: 20px;
+}
+
+.materials-list input,
+.materials-list select {
+	flex-grow: 1;
+	padding: 10px;
+	margin-right: 10px;
+}
+
+.materials-list button {
+	padding: 10px 20px;
+	background-color: #6c5ce7;
+	color: white;
+	border: none;
+	cursor: pointer;
+}
+
+.material-card {
+	background-color: #f8f9fa;
+	border-radius: 5px;
+	padding: 20px;
+	margin-bottom: 20px;
+}
+
+.material-card h3 {
+	margin-top: 0;
+}

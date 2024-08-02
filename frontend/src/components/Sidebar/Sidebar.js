@@ -6,12 +6,15 @@ function Sidebar({ currentView, setCurrentView, isAdmin }) {
     <div className="sidebar">
       <div className="sidebar-content">
         <div className="logo">
-          <h2>Polynskih</h2>
+          <h2>Skillzone</h2>
         </div>
         <nav>
           <ul>
             <li className={currentView === 'tests' ? 'active' : ''} onClick={() => setCurrentView('tests')}>
               <span className="icon">🧩</span> Тесты
+            </li>
+            <li className={currentView === 'materials' ? 'active' : ''} onClick={() => setCurrentView('materials')}>
+              <span className="icon">📚</span> Материалы
             </li>
             <li className={currentView === 'profile' ? 'active' : ''} onClick={() => setCurrentView('profile')}>
               <span className="icon">👤</span> Профиль
