@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import { login, register, setAuthToken } from '../../utils/api';
 
 function Auth({ setToken, setUser }) {
   const [isLogin, setIsLogin] = useState(true);
@@ -9,11 +9,15 @@ function Auth({ setToken, setUser }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const endpoint = isLogin ? '/login' : '/register';
-      const response = await axios.post(`http://localhost:5000${endpoint}`, { username, password });
+      const authFunction = isLogin ? login : register;
+      const response = await authFunction(username, password);
+      
       if (response.data.access_token) {
-        setToken(response.data.access_token);
-        // Убедитесь, что вы устанавливаете все необходимые поля пользователя
+        const token = response.data.access_token;
+        setAuthToken(token);
+        localStorage.setItem('token', token);
+        setToken(token);
+        
         setUser({ 
           username: response.data.username,
           level: response.data.level,
@@ -23,6 +27,7 @@ function Auth({ setToken, setUser }) {
       }
     } catch (error) {
       console.error('An error occurred:', error);
+      // Здесь можно добавить обработку ошибок, например, показать сообщение пользователю
     }
   };
 

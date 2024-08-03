@@ -9,7 +9,7 @@ function TestModal({ test, onSave, onClose }) {
       console.log('Initializing test data:', JSON.stringify(test, null, 2));
       setTestData(test);
     } else {
-      setTestData({ title: '', questions: [] });
+      setTestData({ title: '', difficulty: '', image_url: '', questions: [] });
     }
   }, [test]);
 
@@ -66,6 +66,14 @@ function TestModal({ test, onSave, onClose }) {
     });
   };
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setTestData(prevData => ({
+      ...prevData,
+      [name]: value
+    }));
+  };
+
   if (!testData) return null;
 
   return (
@@ -74,10 +82,30 @@ function TestModal({ test, onSave, onClose }) {
         <h2>{test ? 'Редактировать тест' : 'Создать новый тест'}</h2>
         <input
           type="text"
+          name="title"
           className="test-title-input"
           value={testData.title}
-          onChange={(e) => setTestData({ ...testData, title: e.target.value })}
+          onChange={handleChange}
           placeholder="Название теста"
+        />
+        <select
+          name="difficulty"
+          value={testData.difficulty}
+          onChange={handleChange}
+          className="test-difficulty-select"
+        >
+          <option value="">Выберите сложность</option>
+          <option value="Junior">Junior</option>
+          <option value="Middle">Middle</option>
+          <option value="Senior">Senior</option>
+        </select>
+        <input
+          type="url"
+          name="image_url"
+          className="test-image-input"
+          value={testData.image_url}
+          onChange={handleChange}
+          placeholder="URL изображения теста"
         />
         {testData.questions.map((question, qIndex) => (
           <div key={qIndex} className="question-block">

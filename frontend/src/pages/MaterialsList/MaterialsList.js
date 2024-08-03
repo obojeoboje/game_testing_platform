@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect } from 'react';
+import { getMaterials, getTopics } from '../../utils/api';
+import closeIcon from '../../icons/Close_MD.svg';
 import '../../styles/pages/MaterialsList.css';
 
 function MaterialsList({ token }) {
@@ -8,7 +9,6 @@ function MaterialsList({ token }) {
   const [search, setSearch] = useState('');
   const [selectedTopic, setSelectedTopic] = useState('');
   const [selectedMaterial, setSelectedMaterial] = useState(null);
-  const modalRef = useRef(null);
 
   useEffect(() => {
     fetchMaterials();
@@ -17,9 +17,7 @@ function MaterialsList({ token }) {
 
   const fetchMaterials = async () => {
     try {
-      const response = await axios.get(`http://localhost:5000/materials?search=${search}&topic=${selectedTopic}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await getMaterials(search, selectedTopic);
       setMaterials(response.data);
     } catch (error) {
       console.error('Error fetching materials:', error);
@@ -28,9 +26,7 @@ function MaterialsList({ token }) {
 
   const fetchTopics = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/materials/topics', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await getTopics();
       setTopics(response.data);
     } catch (error) {
       console.error('Error fetching topics:', error);
@@ -50,22 +46,9 @@ function MaterialsList({ token }) {
     fetchMaterials();
   };
 
-  const handleReadMore = (material) => {
+  const handleMaterialSelect = (material) => {
     setSelectedMaterial(material);
   };
-
-  const closeModal = (e) => {
-    if (modalRef.current && !modalRef.current.contains(e.target)) {
-      setSelectedMaterial(null);
-    }
-  };
-
-  useEffect(() => {
-    document.addEventListener('mousedown', closeModal);
-    return () => {
-      document.removeEventListener('mousedown', closeModal);
-    };
-  }, []);
 
   return (
     <div className="materials-list">
@@ -87,27 +70,34 @@ function MaterialsList({ token }) {
       </form>
       <div className="materials-grid">
         {materials.map(material => (
-          <div key={material.id} className="material-card">
+          <div 
+            key={material.id} 
+            className="material-card"
+            onClick={() => handleMaterialSelect(material)}
+          >
             {material.cover_image && (
               <img src={material.cover_image} alt={material.title} className="material-cover" />
             )}
             <h3>{material.title}</h3>
             <p className="material-topic">Тема: {material.topic}</p>
-            <div className="material-preview" dangerouslySetInnerHTML={{ __html: material.content.substring(0, 100) + '...' }} />
-            <button className="read-more" onClick={() => handleReadMore(material)}>Читать далее</button>
           </div>
         ))}
       </div>
       {selectedMaterial && (
-        <div className="modal" onClick={closeModal}>
-          <div className="modal-content" ref={modalRef}>
+        <div className="modal" onClick={() => setSelectedMaterial(null)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <button 
+              className="close-button" 
+              onClick={() => setSelectedMaterial(null)}
+            >
+              <img src={closeIcon} alt="Close" />
+            </button>
             {selectedMaterial.cover_image && (
               <img src={selectedMaterial.cover_image} alt={selectedMaterial.title} className="material-cover-large" />
             )}
             <h2>{selectedMaterial.title}</h2>
             <p className="material-topic">Тема: {selectedMaterial.topic}</p>
             <div dangerouslySetInnerHTML={{ __html: selectedMaterial.content }} />
-            <button onClick={() => setSelectedMaterial(null)}>Закрыть</button>
           </div>
         </div>
       )}

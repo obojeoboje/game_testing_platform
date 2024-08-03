@@ -8,4 +8,6 @@
 	--hover-color: #5b4bc7;
 	--shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 	--border-color: #e0e0e0;
+	--shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+	--shadow-hover: 0 6px 8px rgba(0, 0, 0, 0.15);
 }
