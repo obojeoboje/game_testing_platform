@@ -37,6 +37,7 @@ function Sidebar({ currentView, setCurrentView, isAdmin }) {
           </ul>
         </nav>
       </div>
+      <div className="sidebar-footer">Beta Version 0.1.0</div>
       <div className="sidebar-footer">
         <button className="support-btn">
           <span className="icon"><Flag /></span> Поддержка
